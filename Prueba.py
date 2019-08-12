@@ -11,6 +11,7 @@ SIM_TIME = WEEKS * 7 * 24 * 60  # Simulation time in minutes
 Q = 0 #Numero de partes ensambladas con la maquina
 P1 = 0 #numero de partes 1 en la cola
 P2 = 0 #numero de partes 2 en la cola
+MaxIterations = 100 #Numero maximo de operacion de ensamble que se realizaran
 ocupada = False
 
 
@@ -32,26 +33,30 @@ def GenerateP1(env, maquina):
     global ocupada
     env.process(GenerateP2(env, maquina))
     global ocupada
-    while True:
+    contador = 0
+    while contador < MaxIterations:
         tiempo =   Tiempo_para_llegada_parte1()
         yield env.timeout(tiempo)
         print ("una parte 1 llego en: %d"%(env.now))
         P1 += 1
+        contador += 1
         if((P1 > 0) and (P2 > 0) and (not ocupada)):
-        #if((P1 > 0) and (not ocupada)):
             env.process(maquina.ensamblaje(env))
             
 def GenerateP2(env, maquina):
     global P1
     global P2
     global ocupada
-    while True:
+    contador = 0
+    while contador < MaxIterations:
         tiempo =   Tiempo_para_llegada_parte2()
         yield env.timeout(tiempo)
         print ("una parte 2 llego en: %d"%(env.now))
         P2 = P2 + 1
+        contador += 1
         if((P1 > 0) and (P2 > 0) and (not ocupada)):
             env.process(maquina.ensamblaje(env))
+    print (contador)
 
 class Maquina(object):
     """
@@ -69,21 +74,29 @@ class Maquina(object):
         ocupada= True
         while ocupada:
             tiempo_ensablaje = Tiempo_para_ensamblaje()
-            print ("Se ha empezado a ensamblar un par de partes en t = " + str(env.now))
+            print ("Se ha empezado a ensamblar un par de partes en t = %d" %(env.now))
             yield self.env.timeout(tiempo_ensablaje)
             Q += 1
             P1 -= 1
             P2 -= 1
-            print ("Se han ensamblado las partes en el timepo t = " + str(env.now))
+            print ("Se han ensamblado las partes en el timepo t = %d" %(env.now))
             if( P1 == 0 or  P2 == 0):
+                print(Q)
                 ocupada = False
+            
+            
+
+def proc():
+    global Q
+    global MaxIterations
+    if(Q == MaxIterations):
+        return None
 
 def main():
     env = simpy.Environment()
     maquina = Maquina(env)
     env.process(GenerateP1(env, maquina))
-    env.process(GenerateP1(env, maquina))
-    env.run(until=120)
+    env.run(until=(proc()))
     print("Partes ensambladas = " + str(Q) + "\nPartes1 por ensamblar" + str(P1) + "\nPartes2 por ensamblar" + str(P2)) 
 
 if __name__ == "__main__":
