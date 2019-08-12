@@ -8,24 +8,32 @@ RANDOM_SEED = 42
 ENSAMBLY_DURATION = 30.0    # Duration of other jobs in minutes
 WEEKS = 4              # Simulation time in weeks
 SIM_TIME = WEEKS * 7 * 24 * 60  # Simulation time in minutes
-Q = 0 #Numero de partes ensambladas con la maquina
-P1 = 0 #numero de partes 1 en la cola
-P2 = 0 #numero de partes 2 en la cola
-MaxIterations = 100 #Numero maximo de operacion de ensamble que se realizaran
+
+Q = 0 # Number of parts assembled with the machine
+P1 = 0 # Number of parts in queue 1
+P2 = 0 # Number of parts in queue 2
+MaxIterations = 100 #Max numbers of iterations
+
 ocupada = False
 
 
 def Tiempo_para_llegada_parte1():
-    """Retorna el tiempo de llegada de la parte 1."""
-    return random.uniform(1,6)
+    """Returns the arrival time of part 1"""
+    #return random.uniform(1,6)    
+    #return random.triangular(1,6) #distribucion triangular 1<=x<=6
+    return random.normalvariate(4,0.5) #distribucion normal con media=4 y desviacion=0.5
 
 def Tiempo_para_llegada_parte2():
-    """Retorna el timepo de lelgada de la parte 2."""
-    return random.uniform(3,8)
+    """Returns the arrival time of part 2"""
+    #return random.uniform(3,8)    
+    #return random.triangular(3,8) #distribucion triangular 3<=x<=8
+    return random.normalvariate(5,0.5) #distribucion normal con media=5 y desviacion=0.5
 
 def Tiempo_para_ensamblaje():
-    """Retorna el tiempo de finalizacion del ensamblaje de dos partes."""
-    return random.uniform(5,9)
+    """Returns the completion time of the two-part assembly"""
+    #return random.uniform(5,9)    
+    #return random.triangular(5,9) #distribucion triangular 3<=x<=8
+    return random.normalvariate(7,0.5) #distribucion normal con media=7 y desviacion=0.5
 
 def GenerateP1(env, maquina):
     global P1
@@ -37,7 +45,7 @@ def GenerateP1(env, maquina):
     while contador < MaxIterations:
         tiempo =   Tiempo_para_llegada_parte1()
         yield env.timeout(tiempo)
-        print ("una parte 1 llego en: %d"%(env.now))
+        print ("una parte 1 llegó en: %d"%(env.now))
         P1 += 1
         contador += 1
         if((P1 > 0) and (P2 > 0) and (not ocupada)):
@@ -51,7 +59,7 @@ def GenerateP2(env, maquina):
     while contador < MaxIterations:
         tiempo =   Tiempo_para_llegada_parte2()
         yield env.timeout(tiempo)
-        print ("una parte 2 llego en: %d"%(env.now))
+        print ("una parte 2 llegó en: %d"%(env.now))
         P2 = P2 + 1
         contador += 1
         if((P1 > 0) and (P2 > 0) and (not ocupada)):
@@ -60,7 +68,7 @@ def GenerateP2(env, maquina):
 
 class Maquina(object):
     """
-    Una maquina ensambla dos tipos partes de maquinaria diferentes en un tiempo previsto 
+    A machine assembles two different types of machinery parts in an expected time 
     """
     
     def __init__(self, env):
