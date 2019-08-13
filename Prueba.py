@@ -49,7 +49,7 @@ def Tiempo_de_espera_prom_partes1():
         print("Parte 1 #%d tiempo de espera: %d"%(i, ET_Parts[i] - AT_Part1[i]))
     return (contador/len(AT_Part1))
 
-def Timepo_de_espera_prom_partes2():
+def Tiempo_de_espera_prom_partes2():
     global AT_Part2
     global ET_Parts
     contador = 0
