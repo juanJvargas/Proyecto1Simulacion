@@ -37,16 +37,16 @@ def Tiempo_para_ensamblaje():
     #return random.triangular(5,9) #distribucion triangular 3<=x<=8
     return random.normalvariate(7,0.5) #distribucion normal con media=7 y desviacion=0.5
 
-def Timepo_de_espera_prom_partes1():
+def Tiempo_de_espera_prom_partes1():
     global AT_Part1
     global ET_Parts
     contador = 0
     t= len(AT_Part1)
     for i in range(t):
         contador += ET_Parts[i] - AT_Part1[i]
-        print("parte 1 #%d tiempo de llegada: %d"%(i, AT_Part1[i]))
-        print("parte 1 #%d tiempo de Salida: %d"%(i, ET_Parts[i]))
-        print("parte 1 #%d tiempo de espera: %d"%(i, ET_Parts[i] - AT_Part1[i]))
+        print("Parte 1 #%d tiempo de llegada: %d"%(i, AT_Part1[i]))
+        print("Parte 1 #%d tiempo de Salida: %d"%(i, ET_Parts[i]))
+        print("Parte 1 #%d tiempo de espera: %d"%(i, ET_Parts[i] - AT_Part1[i]))
     return (contador/len(AT_Part1))
 
 def Timepo_de_espera_prom_partes2():
@@ -68,7 +68,7 @@ def GenerateP1(env, maquina):
     while contador < MaxIterations:
         tiempo =   Tiempo_para_llegada_parte1()
         yield env.timeout(tiempo)
-        print ("una parte 1 llegó en: %d"%(env.now))
+        print ("Una parte 1 llegó en: %d"%(env.now))
         AT_Part1.append(int(env.now))
         P1 += 1
         contador += 1
@@ -84,7 +84,7 @@ def GenerateP2(env, maquina):
     while contador < MaxIterations:
         tiempo =   Tiempo_para_llegada_parte2()
         yield env.timeout(tiempo)
-        print ("una parte 2 llegó en: %d"%(env.now))
+        print ("Una parte 2 llegó en: %d"%(env.now))
         AT_Part2.append(int(env.now))
         P2 = P2 + 1
         contador += 1
@@ -115,7 +115,7 @@ class Maquina(object):
             Q += 1
             P1 -= 1
             P2 -= 1
-            print ("Se han ensamblado las partes en el timepo t = %d" %(env.now))
+            print ("Se han ensamblado las partes en el tiempo t = %d" %(env.now))
             if( P1 == 0 or  P2 == 0):
                 print(Q)
                 ocupada = False
@@ -134,8 +134,8 @@ def main():
     env.process(GenerateP1(env, maquina))
     env.run(until=(proc()))
     print("Partes ensambladas = " + str(Q)) 
-    print("Timepo promedio de espera para las partes 1: %d"%Timepo_de_espera_prom_partes1())
-    print("Timepo promedio de espera para las partes 2: %d"%Timepo_de_espera_prom_partes2())
+    print("Tiempo promedio de espera para las partes 1: %d"%Tiempo_de_espera_prom_partes1())
+    print("Tiempo promedio de espera para las partes 2: %d"%Tiempo_de_espera_prom_partes2())
 
 if __name__ == "__main__":
     main()
