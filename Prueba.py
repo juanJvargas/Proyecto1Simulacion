@@ -16,8 +16,9 @@ MaxIterations = 100 #Max numbers of iterations
 AT_Part1=[]
 AT_Part2=[]
 ET_Parts=[]
+DT_parts=[]
 ocupada = False
-
+UT = 0 #timepo de uso de la maquina
 
 def Tiempo_para_llegada_parte1():
     """Returns the arrival time of part 1"""
@@ -28,25 +29,24 @@ def Tiempo_para_llegada_parte1():
 def Tiempo_para_llegada_parte2():
     """Returns the arrival time of part 2"""
     #return random.uniform(3,8)    
-    return random.triangular(3,8) #distribucion triangular 3<=x<=8
-    #return random.normalvariate(5,0.5) #distribucion normal con media=5 y desviacion=0.5
+    #return random.triangular(3,8,3) #distribucion triangular 3<=x<=8
+    return random.normalvariate(5,0.5) #distribucion normal con media=5 y desviacion=0.5
 
 def Tiempo_para_ensamblaje():
     """Returns the completion time of the two-part assembly"""
     #return random.uniform(5,9)    
-    #return random.triangular(5,9) #distribucion triangular 3<=x<=8
-    return random.normalvariate(7,0.5) #distribucion normal con media=7 y desviacion=0.5
+    return random.triangular(5,9, 7) #distribucion triangular 3<=x<=8
+    #return random.normalvariate(7,0.5) #distribucion normal con media=7 y desviacion=0.5
 
 def Tiempo_de_espera_prom_partes1():
     global AT_Part1
     global ET_Parts
     contador = 0
+    print("tiempos de llegada partes 1:")
     t= len(AT_Part1)
     for i in range(t):
         contador += ET_Parts[i] - AT_Part1[i]
-        print("Parte 1 #%d tiempo de llegada: %d"%(i, AT_Part1[i]))
-        print("Parte 1 #%d tiempo de Salida: %d"%(i, ET_Parts[i]))
-        print("Parte 1 #%d tiempo de espera: %d"%(i, ET_Parts[i] - AT_Part1[i]))
+        print("%0.3f"%AT_Part1[i])
     return (contador/len(AT_Part1))
 
 def Tiempo_de_espera_prom_partes2():
@@ -54,9 +54,12 @@ def Tiempo_de_espera_prom_partes2():
     global ET_Parts
     contador = 0
     t= len(AT_Part2)
+    print("tiempos de llegada partes 2:")
     for i in range(t):
         contador += ET_Parts[i] - AT_Part2[i]
+        print("%0.3f"%AT_Part2[i])
     return (contador/len(AT_Part2))
+
 
 def GenerateP1(env, maquina):
     global P1
@@ -68,8 +71,7 @@ def GenerateP1(env, maquina):
     while contador < MaxIterations:
         tiempo =   Tiempo_para_llegada_parte1()
         yield env.timeout(tiempo)
-        print ("Una parte 1 llegó en: %d"%(env.now))
-        AT_Part1.append(int(env.now))
+        AT_Part1.append(env.now)
         P1 += 1
         contador += 1
         if((P1 > 0) and (P2 > 0) and (not ocupada)):
@@ -84,8 +86,7 @@ def GenerateP2(env, maquina):
     while contador < MaxIterations:
         tiempo =   Tiempo_para_llegada_parte2()
         yield env.timeout(tiempo)
-        print ("Una parte 2 llegó en: %d"%(env.now))
-        AT_Part2.append(int(env.now))
+        AT_Part2.append(env.now)
         P2 = P2 + 1
         contador += 1
         if((P1 > 0) and (P2 > 0) and (not ocupada)):
@@ -106,16 +107,18 @@ class Maquina(object):
         global P2
         global ocupada
         global ET_Parts
+        global UT
+        global DT_parts
         ocupada= True
         while ocupada:
             tiempo_ensablaje = Tiempo_para_ensamblaje()
-            print ("Se ha empezado a ensamblar un par de partes en t = %d" %(env.now))
-            ET_Parts.append(int(env.now))
+            ET_Parts.append(env.now)
+            UT += tiempo_ensablaje
             yield self.env.timeout(tiempo_ensablaje)
+            DT_parts.append(env.now)
             Q += 1
             P1 -= 1
             P2 -= 1
-            print ("Se han ensamblado las partes en el tiempo t = %d" %(env.now))
             if( P1 == 0 or  P2 == 0):
                 print(Q)
                 ocupada = False
@@ -133,9 +136,18 @@ def main():
     maquina = Maquina(env)
     env.process(GenerateP1(env, maquina))
     env.run(until=(proc()))
-    print("Partes ensambladas = " + str(Q)) 
     print("Tiempo promedio de espera para las partes 1: %d"%Tiempo_de_espera_prom_partes1())
     print("Tiempo promedio de espera para las partes 2: %d"%Tiempo_de_espera_prom_partes2())
+    print("tiempos de inicio de ensamblaje") 
+    for i in ET_Parts:
+        print("%0.3f"%i)
+    print("tiempos de final de ensamblaje") 
+    for i in DT_parts:
+        print("%0.3f"%i)
+    print("Partes ensambladas = " + str(Q)) 
+    print("Tiempo de uso de la maquina: %d"%UT)
+    print("Tiempo promedio de uso de la maquina por par de partes: %d"%(UT/Q))
+
 
 if __name__ == "__main__":
     main()
