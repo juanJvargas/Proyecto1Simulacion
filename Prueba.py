@@ -28,8 +28,8 @@ def Tiempo_para_llegada_parte1():
 def Tiempo_para_llegada_parte2():
     """Returns the arrival time of part 2"""
     #return random.uniform(3,8)    
-    #return random.triangular(3,8) #distribucion triangular 3<=x<=8
-    return random.normalvariate(5,0.5) #distribucion normal con media=5 y desviacion=0.5
+    return random.triangular(3,8) #distribucion triangular 3<=x<=8
+    #return random.normalvariate(5,0.5) #distribucion normal con media=5 y desviacion=0.5
 
 def Tiempo_para_ensamblaje():
     """Returns the completion time of the two-part assembly"""
